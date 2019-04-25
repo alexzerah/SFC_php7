@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace AppBundle\Controller;
 
@@ -14,6 +15,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GenusController extends Controller
 {
+    /**
+     * @Route("/types")
+     */
+    public function typesExampleAction()
+    {
+        $genus = new Genus();
+        $genus->setName('Octopus');
+
+        $genus->setFunFact('This is fun');
+        var_dump($genus->getFunFact());
+
+        $genus->setFunFact(null);
+        var_dump($genus->getFunFact());
+        die;
+    }
+
     /**
      * @Route("/genus/new")
      */
@@ -88,10 +105,14 @@ class GenusController extends Controller
         $recentNotes = $em->getRepository('AppBundle:GenusNote')
             ->findAllRecentNotesForGenus($genus);
 
+        $foodArray = ['shrimp', 'clams', 'lobsters', 'shark'];
+        $foodObject = new \ArrayObject($foodArray);
+
         return $this->render('genus/show.html.twig', array(
             'genus' => $genus,
             'funFact' => $funFact,
-            'recentNoteCount' => count($recentNotes)
+            'recentNoteCount' => count($recentNotes),
+            'recentlyAte' => $genus->feed($foodObject)
         ));
     }
 
@@ -107,7 +128,7 @@ class GenusController extends Controller
             $notes[] = [
                 'id' => $note->getId(),
                 'username' => $note->getUsername(),
-                'avatarUri' => '/images/'.$note->getUserAvatarFilename(),
+                'avatarUri' => $note->getUserAvatarUri(),
                 'note' => $note->getNote(),
                 'date' => $note->getCreatedAt()->format('M d, Y')
             ];
